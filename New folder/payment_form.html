@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Options</title>
+    <style>
+        /* Basic styling for the body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container styling */
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heading styling */
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Form styling */
+        form {
+            margin-top: 20px;
+        }
+
+        /* Label styling */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        /* Input styling */
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Button styling */
+        .payment-option-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .payment-option-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Additional styling for the form elements */
+        /* You can customize these styles further based on your preferences */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Payment Option</h1>
+        <form id="paymentForm" action="process_payment.html" method="post">
+            <h2>Proceed to Payment</h2>
+            <label for="name">Your Name:</label><br>
+            <input type="text" id="name" name="name" required><br>
+            <label for="email">Your Email:</label><br>
+            <input type="email" id="email" name="email" required><br>
+            <label for="address">Your Address:</label><br>
+            <textarea id="address" name="address" rows="4" required></textarea><br>
+            <input type="hidden" id="paymentOption" name="payment_option">
+            <div id="paymentOptions">
+                <button class="payment-option-btn" id="googlepay" type="button">Google Pay</button>
+                <button class="payment-option-btn" id="phonepe" type="button">PhonePe</button>
+                <button class="payment-option-btn" id="upi" type="button">UPI Payment</button>
+                <button class="payment-option-btn" id="netbanking" type="button">Netbanking</button>
+                <button class="payment-option-btn" id="cashondelivery" type="button">Cash on Delivery</button>
+            </div>
+            <input type="submit" id="submitBtn" value="Proceed to Payment" style="display: none;">
+        </form>
+    </div>
+
+    <script>
+        // Function to handle click events on payment options
+        function handlePaymentOption(option) {
+            document.getElementById('paymentOption').value = option;
+            document.getElementById('submitBtn').click();
+        }
+
+        // Attach click event listeners to the payment option buttons
+        document.getElementById("googlepay").addEventListener("click", function() {
+            handlePaymentOption("googlepay");
+        });
+        document.getElementById("phonepe").addEventListener("click", function() {
+            handlePaymentOption("phonepe");
+        });
+        document.getElementById("upi").addEventListener("click", function() {
+            handlePaymentOption("upi");
+        });
+        document.getElementById("netbanking").addEventListener("click", function() {
+            handlePaymentOption("netbanking");
+        });
+        document.getElementById("cashondelivery").addEventListener("click", function() {
+            handlePaymentOption("cashondelivery");
+        });
+
+        // Function to handle payment initiation
+function initiatePaymentWithGooglePay() {
+    // Construct the API request with necessary parameters
+    var paymentRequest = {
+        // Your payment gateway's endpoint for Google Pay
+        url: 'https://your-payment-gateway.com/googlepay',
+        // Other parameters such as amount, currency, etc.
+        amount: 100, // Example amount in cents
+        currency: 'USD',
+        // Additional parameters as required by the API
+        // ...
+    };
+
+    // Make an AJAX call to initiate the payment
+    // This example uses jQuery for simplicity, but you can use other methods as well
+    $.ajax({
+        url: paymentRequest.url,
+        method: 'POST',
+        data: paymentRequest,
+        success: function(response) {
+            // Handle success response
+            console.log('Payment initiated successfully');
+            // Redirect user to Google Pay or handle the response as per your payment gateway's requirements
+            window.location.href = response.redirect_url;
+        },
+        error: function(xhr, status, error) {
+            // Handle error response
+            console.error('Error initiating payment:', error);
+            // Handle error condition, e.g., display an error message to the user
+        }
+    });
+}
+
+    </script>
+</body>
+</html>

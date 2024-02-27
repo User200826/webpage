@@ -1,0 +1,509 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const cart = []; // Array to store items in the cart
+
+    // Smooth scrolling for navigation tabs
+    const tabs = document.querySelectorAll('nav ul li a');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Add click event listener to products
+    const products = document.querySelectorAll('.product');
+    products.forEach(product => {
+        product.addEventListener('click', function() {
+            this.classList.toggle('active');
+            addToCart(this.querySelector('h4').innerText);
+        });
+    });
+
+    // Add click event listener to accessories
+    const accessories = document.querySelectorAll('.accessory');
+    accessories.forEach(accessory => {
+        accessory.addEventListener('click', function() {
+            this.classList.toggle('active');
+            addToCart(this.querySelector('h4').innerText);
+        });
+    });
+
+    // Function to add item to the cart
+    function addToCart(itemName) {
+        cart.push(itemName);
+        displayCart();
+    }
+
+    // Display cart modal
+    const cartIcon = document.getElementById('cartIcon');
+    const cartModal = document.getElementById('cartModal');
+    const closeBtn = cartModal.querySelector('.close'); // Corrected the selector
+
+    cartIcon.addEventListener('click', displayCart);
+
+    function displayCart() {
+        const cartContent = document.querySelector('.cart-content');
+        cartContent.innerHTML = '';
+
+        cart.forEach((item, index) => {
+            const cartItemElement = document.createElement('div');
+            cartItemElement.classList.add('cart-item');
+
+            const itemName = document.createElement('span');
+            itemName.textContent = item;
+            cartItemElement.appendChild(itemName);
+
+            const removeBtn = document.createElement('span');
+            removeBtn.classList.add('remove-item');
+            removeBtn.innerHTML = '&times;';
+            removeBtn.setAttribute('data-index', index);
+            removeBtn.addEventListener('click', removeCartItem);
+            cartItemElement.appendChild(removeBtn);
+
+            cartContent.appendChild(cartItemElement);
+        });
+
+        cartModal.style.display = 'block';
+    }
+
+    closeBtn.addEventListener('click', function() {
+        cartModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === cartModal) {
+            cartModal.style.display = 'none';
+        }
+    });
+
+    function removeCartItem() {
+        const index = parseInt(this.getAttribute('data-index'));
+        cart.splice(index, 1);
+        displayCart();
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const assistanceLinks = document.querySelectorAll('.dropdown-content a');
+
+    assistanceLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            openServiceCalculator(this.textContent);
+        });
+    });
+
+    let selectedParts = []; // Array to store selected parts
+    let totalCost = 0; // Variable to store total cost
+
+    function openServiceCalculator(assistanceType) {
+        // Clear previous parts
+        const partsContainer = document.getElementById('partsContainer');
+        partsContainer.innerHTML = '';
+
+        // Define parts based on assistance type
+        let parts = [];
+        if (assistanceType === 'Hardware Issue') {
+            parts = [
+                { name: 'Part A', price: 50 },
+                { name: 'Part B', price: 60 },
+                { name: 'Part C', price: 70 },
+                { name: 'Part D', price: 80 }
+            ];
+        } else if (assistanceType === 'Software Issue') {
+            parts = [
+                { name: 'Part E', price: 70 },
+                { name: 'Part F', price: 80 },
+                { name: 'Part G', price: 90 },
+                { name: 'Part H', price: 100 }
+            ];
+        } else if (assistanceType === 'Water Damage') {
+            parts = [
+                { name: 'Part I', price: 60 },
+                { name: 'Part J', price: 70 },
+                { name: 'Part K', price: 80 },
+                { name: 'Part L', price: 90 }
+            ];
+        } else if (assistanceType === 'Screen Damage') {
+            parts = [
+                { name: 'Part M', price: 80 },
+                { name: 'Part N', price: 90 },
+                { name: 'Part O', price: 100 },
+                { name: 'Part P', price: 110 }
+            ];
+        }
+
+        // Populate parts in the popup
+        parts.forEach(part => {
+            const partElement = document.createElement('div');
+            partElement.classList.add('part');
+            partElement.innerHTML = `
+                <span class="name">${part.name}</span>
+                <span class="price">$${part.price}</span>
+                <button class="add" data-name="${part.name}" data-price="${part.price}">Add</button>
+            `;
+            partsContainer.appendChild(partElement);
+        });
+
+        // Show the service calculator popup
+        const serviceCalculator = document.getElementById('serviceCalculator');
+        serviceCalculator.style.display = 'block';
+    }
+
+    // Update selected parts and total cost
+    function updateSelectedParts() {
+        const selectedPartsContainer = document.getElementById('selectedParts');
+        selectedPartsContainer.innerHTML = '';
+
+        totalCost = 0;
+        selectedParts.forEach((part, index) => {
+            totalCost += part.price;
+            const listItem = document.createElement('li');
+            listItem.textContent = `${part.name}: $${part.price}`;
+            
+            // Create "Cancel" button to cancel selection
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.classList.add('cancel');
+            cancelBtn.addEventListener('click', () => cancelSelection(index));
+            
+            listItem.appendChild(cancelBtn);
+            selectedPartsContainer.appendChild(listItem);
+        });
+
+        // Display total cost
+        const totalAmount = document.getElementById('totalAmount');
+        totalAmount.textContent = `Total Cost: $${totalCost}`;
+
+        // Show "Proceed to Pay" button
+        const proceedToPayBtn = document.getElementById('proceedToPayBtn');
+        proceedToPayBtn.style.display = 'block';
+    }
+
+    // Cancel selection of a part
+    function cancelSelection(index) {
+        selectedParts.splice(index, 1);
+        updateSelectedParts();
+    }
+
+    // Add button click event listener
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add')) {
+            const name = e.target.getAttribute('data-name');
+            const price = parseInt(e.target.getAttribute('data-price'));
+
+            // Add the selected part to the array
+            selectedParts.push({ name, price });
+
+            // Update selected parts and total cost
+            updateSelectedParts();
+        }
+    });
+
+    // "Proceed to Pay" button click event listener
+    const proceedToPayBtn = document.getElementById('proceedToPayBtn');
+    proceedToPayBtn.addEventListener('click', function() {
+        // Simulate payment process (replace with actual payment processing code)
+        console.log(`Total cost: $${totalCost}`);
+        console.log('Payment processed successfully.');
+
+        // Clear selected parts array and hide "Proceed to Pay" button
+        selectedParts = [];
+        proceedToPayBtn.style.display = 'none';
+
+        // Close the popup
+        const serviceCalculator = document.getElementById('serviceCalculator');
+        serviceCalculator.style.display = 'none';
+    });
+
+    // Close popup when clicking close button
+    const closeCalculator = document.getElementById('closeCalculator');
+    closeCalculator.addEventListener('click', function() {
+        const serviceCalculator = document.getElementById('serviceCalculator');
+        serviceCalculator.style.display = 'none';
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Your existing code...
+
+    // Change "Add to Cart" button to "Place Order"
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn.textContent = 'Place Order';
+
+    // Close popup when clicking close icon
+    const closeCalculator = document.getElementById('closeCalculator');
+    closeCalculator.addEventListener('click', function() {
+        const serviceCalculator = document.getElementById('serviceCalculator');
+        serviceCalculator.style.display = 'none';
+    });
+
+    // Place Order button click event listener
+    placeOrderBtn.addEventListener('click', function() {
+        // Your code to place the order
+        console.log('Order placed!');
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Your existing code...
+
+    // Place Order button click event listener
+    placeOrderBtn.addEventListener('click', function() {
+        // Redirect to the payment option page
+        window.location.href = 'payment.html'; // Replace 'payment.html' with your actual payment page URL
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const contactLink = document.getElementById('contactLink');
+    const contactModal = document.getElementById('contactModal');
+    const closeBtn = contactModal.querySelector('.close');
+  
+    contactLink.addEventListener('click', function() {
+      contactModal.style.display = 'block';
+    });
+  
+    closeBtn.addEventListener('click', function() {
+      contactModal.style.display = 'none';
+    });
+  
+    window.addEventListener('click', function(event) {
+      if (event.target === contactModal) {
+        contactModal.style.display = 'none';
+      }
+    });
+  
+    const contactForm = document.getElementById('contact-form');
+  
+    contactForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      // Here you can add code to handle form submission, e.g., sending data to a server
+      console.log('Form submitted!');
+    });
+  });
+  
+// Function to handle redirection to contact popup
+function redirectToContact(service) {
+    // Display the contact popup
+    displayContactPopup(service);
+}
+
+// Function to display the contact popup
+function displayContactPopup(service) {
+    // Get the contact modal element
+    const contactModal = document.getElementById('contactModal');
+
+    // Update the contact modal content with the selected service
+    const serviceHeading = contactModal.querySelector('h2');
+    serviceHeading.textContent = service;
+
+    // Display the contact modal
+    contactModal.style.display = 'block';
+}
+
+// Close the contact modal when the user clicks on the close button
+const closeContactModal = document.querySelector('.close');
+closeContactModal.addEventListener('click', function() {
+    const contactModal = document.getElementById('contactModal');
+    contactModal.style.display = 'none';
+});
+
+// Close the contact modal when the user clicks outside of it
+window.addEventListener('click', function(event) {
+    const contactModal = document.getElementById('contactModal');
+    if (event.target === contactModal) {
+        contactModal.style.display = 'none';
+    }
+});
+
+const wrapper = document.querySelector(".wrapper");
+const carousel = document.querySelector(".carousel");
+const firstCardWidth = carousel.querySelector(".card").offsetWidth;
+const arrowBtns = document.querySelectorAll(".wrapper i");
+const carouselChildrens = [...carousel.children];
+
+let isDragging = false, isAutoPlay = true, startX, startScrollLeft, timeoutId;
+
+// Get the number of cards that can fit in the carousel at once
+let cardPerView = Math.round(carousel.offsetWidth / firstCardWidth);
+
+// Insert copies of the last few cards to beginning of carousel for infinite scrolling
+carouselChildrens.slice(-cardPerView).reverse().forEach(card => {
+    carousel.insertAdjacentHTML("afterbegin", card.outerHTML);
+});
+
+// Insert copies of the first few cards to end of carousel for infinite scrolling
+carouselChildrens.slice(0, cardPerView).forEach(card => {
+    carousel.insertAdjacentHTML("beforeend", card.outerHTML);
+});
+
+// Scroll the carousel at appropriate postition to hide first few duplicate cards on Firefox
+carousel.classList.add("no-transition");
+carousel.scrollLeft = carousel.offsetWidth;
+carousel.classList.remove("no-transition");
+
+// Add event listeners for the arrow buttons to scroll the carousel left and right
+arrowBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        carousel.scrollLeft += btn.id == "left" ? -firstCardWidth : firstCardWidth;
+    });
+});
+
+const dragStart = (e) => {
+    isDragging = true;
+    carousel.classList.add("dragging");
+    // Records the initial cursor and scroll position of the carousel
+    startX = e.pageX;
+    startScrollLeft = carousel.scrollLeft;
+}
+
+const dragging = (e) => {
+    if(!isDragging) return; // if isDragging is false return from here
+    // Updates the scroll position of the carousel based on the cursor movement
+    carousel.scrollLeft = startScrollLeft - (e.pageX - startX);
+}
+
+const dragStop = () => {
+    isDragging = false;
+    carousel.classList.remove("dragging");
+}
+
+const infiniteScroll = () => {
+    // If the carousel is at the beginning, scroll to the end
+    if(carousel.scrollLeft === 0) {
+        carousel.classList.add("no-transition");
+        carousel.scrollLeft = carousel.scrollWidth - (2 * carousel.offsetWidth);
+        carousel.classList.remove("no-transition");
+    }
+    // If the carousel is at the end, scroll to the beginning
+    else if(Math.ceil(carousel.scrollLeft) === carousel.scrollWidth - carousel.offsetWidth) {
+        carousel.classList.add("no-transition");
+        carousel.scrollLeft = carousel.offsetWidth;
+        carousel.classList.remove("no-transition");
+    }
+
+    // Clear existing timeout & start autoplay if mouse is not hovering over carousel
+    clearTimeout(timeoutId);
+    if(!wrapper.matches(":hover")) autoPlay();
+}
+
+const autoPlay = () => {
+    if(window.innerWidth < 800 || !isAutoPlay) return; // Return if window is smaller than 800 or isAutoPlay is false
+    // Autoplay the carousel after every 2500 ms
+    timeoutId = setTimeout(() => carousel.scrollLeft += firstCardWidth, 2500);
+}
+autoPlay();
+
+carousel.addEventListener("mousedown", dragStart);
+carousel.addEventListener("mousemove", dragging);
+document.addEventListener("mouseup", dragStop);
+carousel.addEventListener("scroll", infiniteScroll);
+wrapper.addEventListener("mouseenter", () => clearTimeout(timeoutId));
+wrapper.addEventListener("mouseleave", autoPlay);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchDropdown = document.getElementById('searchDropdown');
+    const mainContent = document.querySelector('main');
+    const searchResults = document.getElementById('searchResults');
+
+    // Function to display search results
+    function displaySearchResults(results) {
+        searchResults.innerHTML = ''; // Clear previous search results
+        results.forEach(result => {
+            const resultElement = document.createElement('div');
+            resultElement.textContent = result;
+            searchResults.appendChild(resultElement);
+        });
+    }
+
+    // Function to handle search
+    function performSearch(searchTerm) {
+        if (searchTerm) {
+            const matches = highlightMatches(searchTerm);
+            if (matches.length > 0) {
+                scrollToMatch(matches[0]);
+            } else {
+                alert('No matching content found.');
+            }
+        }
+    }
+
+    // Function to handle click on search icon
+    searchIcon.addEventListener('click', function(event) {
+        event.preventDefault();
+        performSearch(searchInput.value.trim().toLowerCase());
+    });
+
+    // Function to handle search when Enter key is pressed
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            performSearch(searchInput.value.trim().toLowerCase());
+        }
+    });
+
+    // Function to handle suggested search item click
+    searchDropdown.addEventListener('click', function(event) {
+        if (event.target.tagName === 'LI') {
+            searchInput.value = event.target.textContent.trim();
+            performSearch(searchInput.value.toLowerCase());
+            searchDropdown.style.display = 'none'; // Hide dropdown after selection
+        }
+    });
+
+    // Function to highlight matches within main content
+    function highlightMatches(term) {
+        // Remove existing highlights
+        removeHighlights();
+
+        // Perform case-insensitive search for the term within main content
+        const regex = new RegExp(term, 'gi');
+        const matches = [];
+
+        // Iterate over all text nodes in the main content
+        const walker = document.createTreeWalker(mainContent, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            if (regex.test(node.textContent)) {
+                // Create a new element to wrap the matched text
+                const span = document.createElement('span');
+                span.classList.add('highlight');
+                span.innerHTML = node.textContent.replace(regex, match => {
+                    return `<span class="highlight">${match}</span>`;
+                });
+                // Replace the original text node with the new highlighted span
+                node.parentNode.insertBefore(span, node);
+                node.parentNode.removeChild(node);
+                matches.push(span);
+            }
+        }
+
+        return matches;
+    }
+
+    // Function to remove highlights
+    function removeHighlights() {
+        const highlights = document.querySelectorAll('.highlight');
+        highlights.forEach(function(highlight) {
+            const parent = highlight.parentNode;
+            parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+        });
+    }
+
+    // Function to scroll to the first match
+    function scrollToMatch(match) {
+        const offset = match.getBoundingClientRect().top;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetScroll = offset + scrollTop - (window.innerHeight / 4); // Adjusted target position
+        window.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
+        });
+    }
+});
+
+
+
