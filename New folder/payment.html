@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Option</title>
+    <!-- Add your CSS file link here if you have any -->
+    <style>
+        /* Add your custom CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Payment Option</h1>
+        <form action="process_payment.php" method="post">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="address">Address:</label>
+            <textarea id="address" name="address" rows="4" required></textarea>
+
+            <input type="submit" value="Proceed to Payment">
+        </form>
+    </div>
+    <script>
+        const express = require('express');
+const mysql = require('mysql');
+const bodyParser = require('body-parser');
+
+const app = express();
+const port = 3000;
+
+// Create a MySQL connection
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'your_username',
+  password: 'your_password',
+  database: 'your_database'
+});
+
+// Connect to MySQL
+connection.connect((err) => {
+  if (err) throw err;
+  console.log('Connected to MySQL database');
+});
+
+// Create a table if it doesn't exist
+connection.query(`
+  CREATE TABLE IF NOT EXISTS payment_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL
+  )
+`, (err, result) => {
+  if (err) throw err;
+  console.log('Table created or already exists');
+});
+
+// Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// Parse application/json
+app.use(bodyParser.json());
+
+// Handle form submission
+app.post('/process_payment', (req, res) => {
+  const { name, email, address } = req.body;
+
+  // Insert form data into the database
+  connection.query('INSERT INTO payment_data (name, email, address) VALUES (?, ?, ?)', [name, email, address], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      console.log('Payment data inserted');
+      res.send('Payment processed successfully!');
+    }
+  });
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
+// Assuming you have already obtained Google Pay API credentials and configured your project
+// This code goes within your server-side logic
+
+const googlePay = require('google-pay-api');
+
+// Handle form submission
+app.post('/process_payment', (req, res) => {
+  const { name, email, address } = req.body;
+
+  // Create payment request
+  const paymentRequest = {
+    transactionInfo: {
+      totalPriceStatus: 'FINAL',
+      totalPrice: '10.00', // Example amount
+      currencyCode: 'USD'
+    }
+  };
+
+  // Generate Google Pay button
+  const googlePayButton = googlePay.createButton(paymentRequest);
+
+  // Now, you can either redirect user to Google Pay page or embed the button in your HTML
+  res.send(googlePayButton);
+});
+
+    </script>
+</body>
+</html>
